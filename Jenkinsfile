@@ -1,147 +1,24 @@
 pipeline {
-
-
     agent any
-
-
-
-
-
-    environment {
-
-
-        // Nombre del servicio definido en tu docker-compose.yml
-
-
-        SERVICE_NAME = 'script.py'
-
-
-    }
-
-
-
-
-
-    stages {
-
-
-        stage('Checkout') {
-
-
-            steps {
-
-
-                // Descarga el código de GitHub
-
-
-                checkout scm
-
-
+stages {
+    stage('Checkout') {
+        steps {
+            checkout scm
             }
-
-
         }
-
-
-
-
-
         stage('Build Image') {
-
-
             steps {
-
-
-                echo "Construyendo la imagen de Docker usando Compose..."
-
-
-                // Construye solo el servicio de la aplicación de Python
-
-
-                sh "docker compose build ${SERVICE_NAME}"
-
-
+                // Construye la imagen de Docker usando el Dockerfile del repo
+                sh 'docker build -t fase1:latest .'
             }
-
-
         }
-
-
-
-
-
-        stage('Deploy App') {
-
-
+     stage('Run Container') {
             steps {
-
-
-                echo "Desplegando la aplicación..."
-
-
-                // Levanta el contenedor en segundo plano (-d)
-
-
-                // --force-recreate asegura que se actualice si cambiaste el código
-
-
-                sh "docker compose up -d --force-recreate ${SERVICE_NAME}"
-
-
+                 // Prueba que el contenedor arranca
+                // Nota: Al ser un script interactivo, aquí solo verificamos que compile
+                sh 'docker run --name test-container -d fase1:latest
+                // sh 'docker stop test-container && docker rm test-container'
             }
-
-
         }
-
-
-
-
-
-        stage('Verify') {
-
-
-            steps {
-
-
-                echo "Estado de los contenedores:"
-
-
-                sh 'docker ps'
-
-
-            }
-
-
-        }
-
-
     }
-
-
-
-
-
-    post {
-
-
-        success {
-
-
-            echo '✅ Pipeline finalizado con éxito. La app está corriendo.'
-
-
-        }
-
-
-        failure {
-
-
-            echo '❌ El pipeline falló. Revisa la consola para más detalles.'
-
-
-        }
-
-
-    }
-
-
+}
