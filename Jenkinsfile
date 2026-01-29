@@ -1,23 +1,28 @@
 pipeline {
     agent any
-stages {
-    stage('Checkout') {
-        steps {
-            checkout scm
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
             }
         }
-        stage('Build Image') {
+        
+        stage('Build') {
             steps {
-                // Construye la imagen de Docker usando el Dockerfile del repo
-                sh 'docker build -t fase1:latest .'
+                sh 'docker build -t python-app .'
             }
         }
-     stage('Run Container') {
+        
+        stage('Run') {
             steps {
-                 // Prueba que el contenedor arranca
-                // Nota: Al ser un script interactivo, aquí solo verificamos que compile
-                sh 'docker run --name test-container -d fase1:latest
-                // sh 'docker stop test-container && docker rm test-container'
+                sh '''
+                    docker stop python-app-container || true
+                    docker rm python-app-container || true
+                    docker run -d --name python-app-container python-app
+                    echo "Contenedor ejecutándose:"
+                    docker ps | grep python-app-container
+                '''
             }
         }
     }
